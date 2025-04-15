@@ -64,8 +64,6 @@ function verifyToken(req, res, next) {
       res.sendStatus(403);
     }
     req.user = user;
-    console.log("User entered");
-    console.log(user);
     next();
   });
 }
