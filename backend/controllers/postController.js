@@ -75,6 +75,22 @@ const deletePost = async (postID) => {
   }
 };
 
+const deleteAllPostsByUser = async (userID, userName) => {
+  try {
+    await prisma.post.deleteMany({
+      where: {
+        userId: userID,
+      },
+    });
+    return {
+      message: `All posts from ${userName} deleted successfully!`,
+    };
+  } catch (e) {
+    console.error(e);
+    return;
+  }
+};
+
 const fetchAllPosts = async () => {
   try {
     const posts = await prisma.post.findMany();
@@ -85,4 +101,11 @@ const fetchAllPosts = async () => {
   }
 };
 
-module.exports = { createPost, fetchPost, updatePost, deletePost, fetchAllPosts};
+module.exports = {
+  createPost,
+  fetchPost,
+  updatePost,
+  deletePost,
+  deleteAllPostsByUser,
+  fetchAllPosts,
+};

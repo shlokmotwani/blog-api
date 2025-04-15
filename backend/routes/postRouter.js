@@ -20,13 +20,14 @@ postRouter.post("/", verifyToken, async (req, res) => {
     published: req.body.published,
     userId: req.user.id,
   };
-  let message;
+
   try {
-    message = await createPost(req.user, post);
+    const response = await createPost(req.user, post);
+    res.json(response);
   } catch (e) {
-    message = String(e);
+    console.error(e);
+    return;
   }
-  res.json(message);
 });
 
 postRouter.get("/:postID", verifyToken, async (req, res) => {

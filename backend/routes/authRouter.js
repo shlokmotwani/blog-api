@@ -1,7 +1,7 @@
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { createUser, findUser } = require("../controllers/userController");
+const { createUser, fetchUser } = require("../controllers/userController");
 const authRouter = require("express").Router();
 
 authRouter.get("/", (req, res) => {
@@ -22,7 +22,7 @@ authRouter.get("/login", (req, res) => {
   });
 });
 
-authRouter.post("/sign-up", async (req, res) => {
+authRouter.post("/sign-up", verifyNewEntry, async (req, res) => {
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
   const user = {
@@ -40,7 +40,7 @@ authRouter.post("/sign-up", async (req, res) => {
 });
 
 authRouter.post("/login", async (req, res) => {
-  const user = await findUser(req.body.email);
+  const user = await fetchUser(req.body.email);
   if (!(await bcrypt.compare(req.body.password, user.password))) {
     res.sendStatus(401);
   }
@@ -66,6 +66,24 @@ function verifyToken(req, res, next) {
     req.user = user;
     next();
   });
+}
+
+//checks if an email address is already registered
+async function verifyNewEntry(req, res, next) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: req.body.email,
+      },
+    });
+    if (user) {
+      return res.status(400).send("Email address already registered!");
+    }
+    next();
+  } catch (e) {
+    console.error(e);
+    return;
+  }
 }
 
 module.exports = { authRouter, verifyToken };
